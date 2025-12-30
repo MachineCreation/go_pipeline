@@ -13,5 +13,5 @@ import (
 
 type JobStore interface {
 	Create(job *jobs.Job) error
-	Get(id string) (*jobs.Job)
+	Get(id string) (*jobs.Job, error)
 }

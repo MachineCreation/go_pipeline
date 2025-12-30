@@ -9,32 +9,39 @@
 package main
 
 import (
-	"errors"
-	"fmt"
+	"log"
+	"net/http"
 
-	"github.com/MachineCreation/go_pipeline/internal/jobs"
+	"github.com/MachineCreation/go_pipeline/internal/store"
+	"github.com/MachineCreation/go_pipeline/internal/handlers"
+	"github.com/MachineCreation/go_pipeline/internal/server"
 )
 
-func NewJob(id string) (*jobs.Job, error) {
-
-	// handle empty id string
-	if id == "" {
-		return nil, errors.New("id is required")
-	}
-
-	// no errors, return default value pair
-	return &jobs.Job{
-		ID:		id,
-		Status: "Queued",
-	}, nil
-}
-
 func main() {
-	job, err := NewJob("job-001")
 
-	if err != nil {
-		panic(err)
+	//-----------------------------------------------------------------------------
+	//Resources
+	//-----------------------------------------------------------------------------
+	
+	// create new memory store
+	jobStore := store.NewMemoryStore()
+
+	//-----------------------------------------------------------------------------
+	//Handlers
+	//-----------------------------------------------------------------------------
+
+	//standard health check to determine if server is alive
+	http.HandleFunc("/health", handlers.HealthHandler)
+
+	//create new job
+	http.HandleFunc("/jobs", handlers.NewJobsCreateHandler(jobStore))
+
+	//-----------------------------------------------------------------------------
+	//Server
+	//-----------------------------------------------------------------------------
+
+	serverError := server.StartHTTPServer(":8080", nil)
+	if serverError != nil {
+		log.Fatal(serverError)
 	}
-
-	fmt.Printf("Created job: %+v\n", *job)
 }
