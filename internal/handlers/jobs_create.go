@@ -17,30 +17,26 @@ import (
 
 // NewJobsCreateHandler returns an HTTP handler function that creates
 // jobs using the provided JobStore.
-func NewJobsCreateHandler(jobStore store.JobStore) http.HandlerFunc {
-	return func(responseWriter http.ResponseWriter, request *http.Request) {
-		if request.Method != http.MethodPost {
-			http.Error(responseWriter, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
+func JobsCreateHandler(jobStore store.JobStore) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		
 		var job jobs.Job
 		decoder := json.NewDecoder(request.Body)
 		if err := decoder.Decode(&job); err != nil {
-			http.Error(responseWriter, "invalid JSON", http.StatusBadRequest)
+			http.Error(writer, "invalid JSON", http.StatusBadRequest)
 			return
 		}
 
 		if err := job.Validate(); err != nil {
-			http.Error(responseWriter, err.Error(), http.StatusBadRequest)
+			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		if err := jobStore.Create(&job); err != nil {
-			http.Error(responseWriter, err.Error(), http.StatusInternalServerError)
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		responseWriter.WriteHeader(http.StatusCreated)
+		writer.WriteHeader(http.StatusCreated)
 	}
 }

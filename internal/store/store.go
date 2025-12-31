@@ -14,4 +14,5 @@ import (
 type JobStore interface {
 	Create(job *jobs.Job) error
 	Get(id string) (*jobs.Job, error)
+	StatusUpdate(job *jobs.Job, status string) (*jobs.Job, error)
 }
